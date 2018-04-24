@@ -1,0 +1,35 @@
+{
+    "name": "antonis0490/omnipay-zotapay",
+    "type": "library",
+    "description": "zotapay driver for the Omnipay payment processing library",
+    "keywords": [
+        "zotapay",
+        "wallet",
+        "gateway",
+        "merchant",
+        "omnipay",
+        "pay",
+        "payment",
+        "cakePHP",
+        "symfony"
+    ],
+    "homepage": "https://github.com/antonis0490/omnipay-zotapay",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "antonis0490",
+            "homepage": "https://github.com/antonis0490/omnipay-zotapay/graphs/contributors"
+        }
+    ],
+    "autoload": {
+        "psr-4": { "Omnipay\\zotapay\\" : "src/" }
+    },
+    "require": {
+        "omnipay/common": "~2.0"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.3.x-dev"
+        }
+    }
+}

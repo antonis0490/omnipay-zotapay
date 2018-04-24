@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Omnipay\zotapay\Message;
+namespace Omnipay\Zotapay\Message;
 
 use Omnipay\Common\Exception\InvalidResponseException;
 

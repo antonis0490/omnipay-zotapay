@@ -166,6 +166,6 @@ class Gateway extends AbstractGateway
      */
     public function completePurchase(array $parameters = array())
     {
-        return $this->createRequest('\Omnipay\zotapay\Message\RestCompletePurchaseRequest', $parameters);
+        return $this->createRequest('\Omnipay\Zotapay\Message\PaymentCompleteRequest', $parameters);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Omnipay\zotapay\Message;
+namespace Omnipay\Zotapay\Message;
 
 use Omnipay\Common\Message\AbstractRequest;
 use Omnipay\Common\Exception\InvalidResponseException;
@@ -22,7 +22,7 @@ class PaymentCompleteRequest extends AbstractRequest
     /**
      * @return mixed
      */
-    public function getOrderId()
+    public function getClientOrderid()
     {
         return $this->getParameter('client_orderid');
 
@@ -32,7 +32,7 @@ class PaymentCompleteRequest extends AbstractRequest
      * @param $value
      * @return mixed
      */
-    public function setOrderId($value)
+    public function setClientOrderid($value)
     {
         return $this->setParameter('client_orderid', $value);
     }
@@ -58,7 +58,7 @@ class PaymentCompleteRequest extends AbstractRequest
     /**
      * @return mixed
      */
-    public function getLname()
+    public function getLastName()
     {
         return $this->getParameter('last_name');
 
@@ -68,7 +68,7 @@ class PaymentCompleteRequest extends AbstractRequest
      * @param $value
      * @return mixed
      */
-    public function setLname($value)
+    public function setLastName($value)
     {
         return $this->setParameter('last_name', $value);
     }
@@ -86,7 +86,7 @@ class PaymentCompleteRequest extends AbstractRequest
      * @param $value
      * @return mixed
      */
-    public function setNotifyUrl($value)
+    public function setServerCallbackUrl($value)
     {
         return $this->setParameter('server_callback_url', $value);
     }
@@ -128,7 +128,7 @@ class PaymentCompleteRequest extends AbstractRequest
     /**
      * @return mixed
      */
-    public function getAddress()
+    public function getAddress1()
     {
         return $this->getParameter('address1');
     }
@@ -137,7 +137,7 @@ class PaymentCompleteRequest extends AbstractRequest
      * @param $value
      * @return mixed
      */
-    public function setAddress($value)
+    public function setAddress1($value)
     {
         return $this->setParameter('address1', $value);
     }
@@ -419,14 +419,8 @@ class PaymentCompleteRequest extends AbstractRequest
      */
     public function getToken()
     {
-        $input = array
-        (
+        return $this->getParameter('token');
 
-            "token" => $this->getParameter('token')
-
-
-        );
-        return $input;
     }
 
 
@@ -442,10 +436,29 @@ class PaymentCompleteRequest extends AbstractRequest
     /**
      * @return array
      */
+    public function getZotaEndpoint()
+    {
+        return $this->getParameter('zota_endpoint');
+
+    }
+
+
+    /**
+     * @param $value
+     * @return mixed
+     */
+    public function setZotaEndpoint($value)
+    {
+        return $this->setParameter('zota_endpoint', $value);
+    }
+
+    /**
+     * @return array
+     */
     public function getData()
     {
 
-        $concat = $this->getEndpoint().$this->getOrderId().($this->getAmount() * 100).$this->getEmail().$this->getToken();
+        $concat = $this->getZotaEndpoint().$this->getClientOrderid().($this->getAmount() * 100).$this->getEmail().$this->getToken();
         $concat = sha1($concat);
 
         $sign = crypt($concat, $this->getSecret());
@@ -457,11 +470,11 @@ class PaymentCompleteRequest extends AbstractRequest
 
             "body" => array
             (
-                "client_orderid" => $this-$this->getOrderId(),
+                "client_orderid" => $this->getClientOrderid(),
                 "order_desc" => $this->getOrderDesc(),
                 "first_name" => $this->getFirstName(),
-                "last_name" => $this->getLname(),
-                "address1" => $this->getAddress(),
+                "last_name" => $this->getLastName(),
+                "address1" => $this->getAddress1(),
                 "city" => $this->getCity(),
                 "zip_code" => $this->getZipCode(),
                 "country" => $this->getCountry(),
@@ -496,7 +509,7 @@ class PaymentCompleteRequest extends AbstractRequest
 
     protected function createResponse($data)
     {
-        return $this->response = new PaymentResponse($this, $data, $this->getEndpoint());
+        return $this->response = new PaymentResponse($this, $data, $data["redirect-url"]);
     }
 
     /**
@@ -539,24 +552,40 @@ class PaymentCompleteRequest extends AbstractRequest
             );
         } else {
 
-            $token = "token=".$data['token'];
-            $httpRequest = $this->httpClient->createRequest(
-                $this->getHttpMethod(),
-                $this->getEndpoint(),
-                array(
-                    'Content-type' => 'application/x-www-form-urlencoded',
-                ),
-                $token
-            );
+//            $httpRequest = $this->httpClient->createRequest(
+//                $this->getHttpMethod(),
+//                $this->getEndpoint().$this->getZotaEndpoint(),
+//                array(
+//                    '',
+//                ),
+//                http_build_query($data['body'])
+//
+//            );
+
+            $curl = curl_init($this->getEndpoint().$this->getZotaEndpoint());
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data['body']));
         }
 
         try {
-//            $httpRequest->getCurlOptions()->set(CURLOPT_POSTFIELDS, $data );
-//            $httpRequest->getCurlOptions()->set(CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded') );
-            $httpResponse = $httpRequest->send();
-            // Empty response body should be parsed also as and empty array
-            $body = $httpResponse->getBody(true);
-            return $this->response = $this->createResponse($httpResponse);
+
+            $output = curl_exec($curl);
+            curl_close($curl);
+
+            $answer = array();
+            parse_str($output, $answer);
+
+//            $httpRequest->getCurlOptions()->set(CURLOPT_POSTFIELDS, http_build_query($data['body']) );
+//            $httpRequest->getCurlOptions()->set(CURLOPT_POST, true);
+//            $httpRequest->getCurlOptions()->set(CURLOPT_RETURNTRANSFER, true);
+//
+//            $httpResponse = $httpRequest->send();
+//            // Empty response body should be parsed also as and empty array
+//            $body = $httpResponse->getBody(true);
+            return $this->response = $this->createResponse($answer);
+
+
         } catch (\Exception $e) {
             throw new InvalidResponseException(
                 'Error communicating with payment gateway: ' . $e->getMessage(),

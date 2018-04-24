@@ -1,6 +1,6 @@
 <?php
 
-namespace Omnipay\zotapay\Message;
+namespace Omnipay\Zotapay\Message;
 
 use Omnipay\Common\Message\AbstractResponse;
 use Omnipay\Common\Message\RedirectResponseInterface;

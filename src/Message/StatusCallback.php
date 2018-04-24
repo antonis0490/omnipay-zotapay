@@ -6,11 +6,11 @@ use Omnipay\Common\Message\AbstractResponse;
 
 class StatusCallback extends AbstractResponse
 {
-    const STATUS_SUCCESSFUL = 'paid';
-    const STATUS_DECLINED = 'rejected';
-    const STATUS_ERROR = 'unpaid';
-    const STATUS_PENDING = 'waiting';
-    const STATUS_EXPIRED = 'expired';
+    const STATUS_SUCCESSFUL = 'approved';
+    const STATUS_DECLINED = 'declined';
+    const STATUS_ERROR = 'error';
+    const STATUS_PENDING = 'pending';
+    const STATUS_FILTERED = 'filtered';
 
     public function __construct(array $post)
     {
@@ -127,23 +127,28 @@ class StatusCallback extends AbstractResponse
     }
 
     /**
+     * @return mixed
+     */
+    public function getName()
+    {
+        return $this->data['name'];
+    }
+
+    /**
      * @return bool
      */
-    public function userFilled()
+    public function orderidFilled()
     {
-        return ($this->data['user'] != '' ? true : false);
+        return ($this->data['orderid'] != '' ? true : false);
     }
+
 
     /**
      * @return string
      */
-    public function getResponseChecksum()
+    public function getResponseChecksum($secret_word)
     {
-        $concat = "";
-        foreach($this->data as $key => $value){
-            $concat .= "|".$value;
-        }
-        $concat = mb_substr($concat, 1);
+        $concat = $this->data["status"].$this->data["orderid"].$this->data["merchant_order"].$secret_word;
         return $concat;
     }
 
@@ -166,9 +171,8 @@ class StatusCallback extends AbstractResponse
      */
     public function CalculateChecksum($secret_word, $concat){
 
-        $sign_hash = hash_hmac("sha1", $concat, $secret_word);
-        $calc_sig = base64_encode($this->HexToStr($sign_hash));
-        return $calc_sig;
+        $signature = sha1($concat);
+        return $signature;
     }
 
     /**
@@ -176,9 +180,9 @@ class StatusCallback extends AbstractResponse
      * @return bool
      */
     public function ValidChecksum($secret_word){
-        $concat = $this->getResponseChecksum();
+        $concat = $this->getResponseChecksum($secret_word);
         $checkSum = $this->CalculateChecksum($secret_word, $concat);
-        if (mb_strtolower($checkSum) == mb_strtolower($_SERVER["HTTP_X_API_SIGNATURE"])){
+        if (mb_strtolower($checkSum) == mb_strtolower($this->data['control'])){
             return true;
         }
         return false;

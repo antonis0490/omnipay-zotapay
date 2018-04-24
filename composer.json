@@ -22,7 +22,7 @@
         }
     ],
     "autoload": {
-        "psr-4": { "Omnipay\\zotapay\\" : "src/" }
+        "psr-4": { "Omnipay\\Zotapay\\" : "src/" }
     },
     "require": {
         "omnipay/common": "~2.0"

@@ -1,6 +1,6 @@
 <?php
 
-namespace Omnipay\zotapay;
+namespace Omnipay\Zotapay;
 
 use Omnipay\Common\AbstractGateway;
 
@@ -10,7 +10,7 @@ class Gateway extends AbstractGateway
 
     public function getName()
     {
-        return 'zotapay';
+        return 'Zotapay';
     }
 
     public function getDefaultParameters()

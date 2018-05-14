@@ -1,5 +1,5 @@
 {
-    "name": "antonis0490/omnipay-zotapay",
+    "name": "qobo/omnipay-zotapay",
     "type": "library",
     "description": "zotapay driver for the Omnipay payment processing library",
     "keywords": [

@@ -67,7 +67,7 @@ class StatusCallback extends AbstractResponse
 
     public function getComment()
     {
-        return $this->data['comment'];
+        return $this->data['error_message'];
     }
 
     /**
@@ -116,6 +116,14 @@ class StatusCallback extends AbstractResponse
     public function getUser()
     {
         return $this->data['user'];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOrderId()
+    {
+        return $this->data['orderid'];
     }
 
     /**
